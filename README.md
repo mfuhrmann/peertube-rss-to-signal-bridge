@@ -1,8 +1,16 @@
-# rss-to-signal-bridge
+# peertube-rss-to-signal-bridge
+
+This repo was forked from https://github.com/francocm/rss-to-signal-bridge and modified to be a PeerTube RSS to Signal bridge.
+
+The original docs are very good so I've kept them below. Maybe just let me mention how to obtain a Signal group ID, since this was not super obvious.
+
+In the `signal-cli` container run `signal-cli -u +YOURNUMBER listGroups` to see the IDs. Removed the `=` at the end. Use a tool like https://gc.de/gc/base64/ to encode again. You can use this new and longer string with the two `==` at the end and in the `docker-compose` file.
+
+## rss-to-signal-bridge
 
 Polls RSS feed and publishes message onto Signal using [signal-cli-rest-api](https://github.com/bbernhard/signal-cli-rest-api).
 
-## Configuration
+### Configuration
 
 | Key | Type | Required | Description | Example |
 | --- | ---- | -------- | ----------- | ------- |
@@ -14,13 +22,13 @@ Polls RSS feed and publishes message onto Signal using [signal-cli-rest-api](htt
 | `MESSAGE_TEMPLATE` | String | Yes | `NEW STOCK ALERT - {title}\n\nSummary: {summary}\n\nURL: {link}\n\nPublish timestamp: {publish_timestamp}` | The message template, The placeholders show in the example are replaced with the RSS content. Move these around / use these in whichever way you want. | 
 | `RSS_POLL_INTERVAL` | int | Yes | `120` | Number of seconds between each RSS poll interval. | 
 
-## Running (via docker-compose)
+### Running (via docker-compose)
 
 1. `cp docker-compose.yml.example docker-compose.yml`
 2. Configure the environment variables (and any other relevant configuration) inside the copied `docker-compose.yml`.
 3. `docker-compose up -d`
 
-### Important
+#### Important
 
 * This script saves the state under `data/state.dat`.
     * It's important:
