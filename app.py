@@ -30,21 +30,20 @@ def create_logger() :
 
 log = create_logger()
 
-def send_message(body):
+def send_message(body, recipient):
     if FAKE:
-        log.info("Sending message to: %s" % DESTINATIONS)
+        log.info("Sending message to: %s" % recipient)
         log.info("Body:\n%s" % body)
     else:
         r = requests.post(SIGNAL_API_URL, headers={"Content-Type":"application/json"},
-                json={"message": body, "text_mode": "styled", "recipients": DESTINATIONS, "number": SOURCE})
+                json={"message": body, "text_mode": "styled", "recipients": [recipient], "number": SOURCE})
         log.info("Message sent to Signal with HTTP response code %s and content %s" % (r.status_code, r.content))
 
-def format_message(template, title, link, publish_timestamp):
+def format_message(template, title, link):
     result = template
     result = result.replace('\\n', '\n')
     result = result.replace('{title}', title)
     result = result.replace('{link}', link)
-    result = result.replace('{publish_timestamp}', publish_timestamp)
     return result
 
 def time_struct_to_epoch(time_struct):
@@ -75,8 +74,9 @@ def process_feed_response(feed):
         if epoch_publish_time <= last_processed_timestamp:
             continue
         last_processed_timestamp = epoch_publish_time
-        message = format_message(MESSAGE_TEMPLATE, entry.title, entry.link, entry.published)
-        send_message(message)
+        message = format_message(MESSAGE_TEMPLATE, entry.title, entry.link)
+        for value in DESTINATIONS:
+            send_message(message, value)
         new_messages_count = new_messages_count + 1
     set_last_processed_entry(last_processed_timestamp)
     log.info("Found %s entries in RSS feed of which %s were new. Last processed entry set to %s." %
